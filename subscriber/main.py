@@ -1,34 +1,107 @@
-import pika
-import json
 import os
+import json
+import pika
 from dotenv import load_dotenv
 
 load_dotenv()
 
+##############################################################
+#                ENVS and DEFAULT_VALUES
+##############################################################
+# RabbitMQ infos
 RABBITMQ_USER = os.getenv("RABBITMQ_USER")
 RABBITMQ_PASS = os.getenv("RABBITMQ_PASS")
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
 RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
-PROMOTIONS_ROUTINGKEY = os.getenv("PROMOTIONS_ROUTINGKEY_NAME")
 
-if not all([RABBITMQ_USER, RABBITMQ_PASS, RABBITMQ_HOST, RABBITMQ_PORT, PROMOTIONS_ROUTINGKEY]):
+# Routing Keys
+LOGS_ROUTINGKEY = os.getenv("LOGS_ROUTINGKEY")
+PROMOTIONS_ROUTINGKEY=os.getenv("PROMOTIONS_ROUTINGKEY")
+
+if not all([
+    RABBITMQ_USER, 
+    RABBITMQ_PASS, 
+    RABBITMQ_HOST, 
+    RABBITMQ_PORT, 
+    PROMOTIONS_ROUTINGKEY, 
+    LOGS_ROUTINGKEY, 
+    ]):
     raise EnvironmentError("One or more required environment variables are missing.")
 
-credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASS)
-connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST, port=int(RABBITMQ_PORT), credentials=credentials))
-channel = connection.channel()
-
-channel.queue_declare(queue=PROMOTIONS_ROUTINGKEY, durable=True)
+##############################################################
+#                           CALLBACKS
+##############################################################
 
 def callback(ch, method, properties, body):
-    print(f"{body}")
+    data = json.loads(body.decode("utf-8"))
+    routing_key = method.routing_key
 
-channel.basic_consume(queue=PROMOTIONS_ROUTINGKEY, on_message_callback=callback, auto_ack=True)
+    print(f'Received a new promotion on queue with routing key [{routing_key}]:\n{data}')
 
-try:
-    print("Starting logging consuming...")
-    channel.start_consuming()
-except KeyboardInterrupt:
-    print("Stopping marketing service.")
+##############################################################
+#          QUEUES DECLARATION and RABBITMQ SETUP
+##############################################################
+print("Starting subscriber service")
 
-    
+def create_rabbitmq_connection():
+    credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASS)
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(
+            host=RABBITMQ_HOST, 
+            port=int(RABBITMQ_PORT), 
+            credentials=credentials,
+            heartbeat=3600
+        )
+    )
+    return connection
+
+# Create connection and channel for the consumer
+connection = create_rabbitmq_connection()
+channel = connection.channel()
+channel.exchange_declare(exchange="promotions_topic", exchange_type="topic")
+
+# Subscriber Queue to receive promotions from destination with id 7
+queue_name = "subscriber_queue_destination_id_7"
+routing_key = str(PROMOTIONS_ROUTINGKEY) + f".7"
+channel.queue_declare(queue=queue_name, durable=True)
+channel.queue_bind(exchange="promotions_topic", queue=queue_name, routing_key=routing_key)
+channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+print(f"Queue {queue_name} subscribed to {routing_key}")
+
+# Subscriber Queue to receive promotions from destination with id 22
+queue_name = "subscriber_queue_destination_id_22"
+routing_key = str(PROMOTIONS_ROUTINGKEY) + f".22"
+channel.queue_declare(queue=queue_name, durable=True)
+channel.queue_bind(exchange="promotions_topic", queue=queue_name, routing_key=routing_key)
+channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+print(f"Queue {queue_name} subscribed to {routing_key}")
+
+# Subscriber Queue to receive promotions from all destinations 
+queue_name = "subscriber_queue_destination_all"
+routing_key = str(PROMOTIONS_ROUTINGKEY) + f".#"
+channel.queue_declare(queue=queue_name, durable=True)
+channel.queue_bind(exchange="promotions_topic", queue=queue_name, routing_key=routing_key)
+channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+print(f"Queue {queue_name} subscribed to {routing_key}")
+
+print("Finished setup. All queues declared")
+
+##############################################################
+#                     START SERVICES
+##############################################################
+
+def start_rabbitmq_consumer():
+    "Start consuming RabbitMQ messages"
+    print("Start consuming...")
+    try:
+        channel.start_consuming()
+    except KeyboardInterrupt:
+        print("Stopping reservation service.")
+    finally:
+        if connection and not connection.is_closed:
+            connection.close()
+
+if __name__ == "__main__":  
+    start_rabbitmq_consumer()
+
+##############################################################

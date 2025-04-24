@@ -30,17 +30,6 @@ services:
     env_file:
       - .env
 
-  marketing:
-    container_name: dist_sys_marketing
-    build: ./marketing
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - shared_dist_sys_network
-    env_file:
-      - .env
-
   reservation:
     container_name: dist_sys_reservation
     build: ./reservation
@@ -68,6 +57,30 @@ services:
   tickets:
     container_name: dist_sys_tickets
     build: ./tickets
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+
+  promotions:
+    container_name: dist_sys_promotions
+    build: ./promotions
+    ports:
+      - "11000:11000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+
+  subscriber:
+    container_name: dist_sys_subscriber
+    build: ./subscriber
     depends_on:
       rabbitmq:
         condition: service_healthy
