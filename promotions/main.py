@@ -7,6 +7,7 @@ import pika
 import threading
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 load_dotenv()
 
@@ -72,6 +73,7 @@ print("Finished setup. All queues declared")
 #                     PROMOTIONS API
 ##############################################################
 app = Flask(__name__)
+CORS(app, origins="*")
 
 @app.route("/promotion", methods=["POST"])
 def create_promotion():

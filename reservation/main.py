@@ -7,6 +7,7 @@ import pika
 import threading
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 from crypto_verify import verify_signature
 
@@ -165,6 +166,7 @@ print("Finished setup. All queues declared")
 #                     RESERVATION API
 ##############################################################
 app = Flask(__name__)
+CORS(app, origins="*")
 
 with open("./itinerarios_portugues.json", "r", encoding="utf-8") as file:
     destinations = json.load(file)
@@ -210,7 +212,7 @@ def list_reservations():
     
     return jsonify({
         "count": len(filtered_destinations),
-        "reservations": filtered_destinations
+        "destinations": filtered_destinations
     })
 
 @app.route("/reservations", methods=["GET"])
