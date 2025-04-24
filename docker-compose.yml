@@ -1,0 +1,77 @@
+version: "3.9"
+
+networks:
+  shared_dist_sys_network:
+    driver: bridge
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: dist_sys_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shared_dist_sys_network
+
+  logger:
+    container_name: dist_sys_logger
+    build: ./logger
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+
+  marketing:
+    container_name: dist_sys_marketing
+    build: ./marketing
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+
+  reservation:
+    container_name: dist_sys_reservation
+    build: ./reservation
+    ports:
+      - "6000:6000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+
+  payments:
+    container_name: dist_sys_payments
+    build: ./payments
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+
+  tickets:
+    container_name: dist_sys_tickets
+    build: ./tickets
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
