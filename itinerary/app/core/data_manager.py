@@ -112,7 +112,8 @@ class DataManager:
         for itinerary in self.data:
             if itinerary['id'] == destination_id:
                 itinerary['available_cabins'] -= cabins
-                break
+                return True
+        return False
 
     def register_cancellation(self, destination_id, cabins):
         """
@@ -125,4 +126,5 @@ class DataManager:
         for itinerary in self.data:
             if itinerary['id'] == destination_id:
                 itinerary['available_cabins'] += cabins
-                break
+                return True
+        return False

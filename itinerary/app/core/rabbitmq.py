@@ -48,7 +48,7 @@ class RabbitMQManager:
         self._channel.queue_bind(
             exchange="direct",
             queue=queue_name,
-            routing_key=current_app.config['BOOKING_CREATED_ROUTING_KEY']
+            routing_key=current_app.config['BOOKING_CREATED_ROUTINGKEY']
         )
 
         # Booking Cancelled Queue
@@ -57,7 +57,7 @@ class RabbitMQManager:
         self._channel.queue_bind(
             exchange="direct",
             queue=queue_name,
-            routing_key=current_app.config['BOOKING_CANCELLED_ROUTING_KEY']
+            routing_key=current_app.config['BOOKING_CANCELLED_ROUTINGKEY']
         )
 
         print("Exchanges and queues setup complete")
@@ -97,12 +97,16 @@ class RabbitMQManager:
         try:
             print("Booking created received")
             data = json.loads(body)
-            DataManager().register_booking(
-                destination_id=data['itinerary_id'],
-                cabins=data['cabins']
+            result = DataManager().register_booking(
+                destination_id=data['destination_id'],
+                cabins=data['number_of_cabins']
             )
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-            print("Booking created processed")
+            if result:
+                ch.basic_ack(delivery_tag=method.delivery_tag)
+                print("Booking created processed")
+            else:
+                ch.basic_nack(delivery_tag=method.delivery_tag)
+                print("Booking created not processed")
         except Exception as e:
             print(f"Error handling booking created: {e}")
             ch.basic_nack(delivery_tag=method.delivery_tag)
@@ -111,12 +115,16 @@ class RabbitMQManager:
         try:
             print("Booking cancelled received")
             data = json.loads(body)
-            DataManager().register_cancellation(
-                destination_id=data['itinerary_id'],
-                cabins=data['cabins']
+            result = DataManager().register_cancellation(
+                destination_id=data['destination_id'],
+                cabins=data['number_of_cabins']
             )
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-            print("Booking cancelled processed")
+            if result:
+                ch.basic_ack(delivery_tag=method.delivery_tag)
+                print("Booking cancelled processed")
+            else:
+                ch.basic_nack(delivery_tag=method.delivery_tag)
+                print("Booking cancelled not processed")
         except Exception as e:
             print(f"Error handling booking cancelled: {e}")
             ch.basic_nack(delivery_tag=method.delivery_tag)

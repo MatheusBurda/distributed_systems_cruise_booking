@@ -11,8 +11,8 @@ class Config:
     
     # Routing Keys
     LOGS_ROUTINGKEY = os.getenv("LOGS_ROUTINGKEY")
-    BOOKING_CREATED_ROUTING_KEY = os.getenv("BOOKING_CREATED_ROUTING_KEY")
-    BOOKING_CANCELLED_ROUTING_KEY = os.getenv("BOOKING_CANCELLED_ROUTING_KEY")
+    BOOKING_CREATED_ROUTINGKEY = os.getenv("BOOKING_CREATED_ROUTINGKEY")
+    BOOKING_CANCELLED_ROUTINGKEY = os.getenv("BOOKING_CANCELLED_ROUTINGKEY")
 
     # API Keys
     ITINERARY_MS_PORT = os.getenv("ITINERARY_MS_PORT")
@@ -25,8 +25,8 @@ class Config:
             cls.RABBITMQ_HOST,
             cls.RABBITMQ_PORT,
             cls.LOGS_ROUTINGKEY,
-            cls.BOOKING_CREATED_ROUTING_KEY,
-            cls.BOOKING_CANCELLED_ROUTING_KEY,
+            cls.BOOKING_CREATED_ROUTINGKEY,
+            cls.BOOKING_CANCELLED_ROUTINGKEY,
             cls.ITINERARY_MS_PORT
         ]
         if not all(required_vars):
