@@ -16,7 +16,7 @@ load_dotenv()
 ##############################################################
 #                ENVS and DEFAULT_VALUES
 ##############################################################
-PERCENTAGE_ERROR = 20 # %
+PERCENTAGE_ERROR = 40 # %
 
 # RabbitMQ infos
 RABBITMQ_USER = os.getenv("RABBITMQ_USER")

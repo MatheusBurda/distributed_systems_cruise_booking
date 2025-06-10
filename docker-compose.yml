@@ -45,6 +45,20 @@ services:
       - .env
     restart: unless-stopped
 
+  itinerary:
+    container_name: dist_sys_itinerary
+    build: ./itinerary
+    ports:
+      - "1236:1236"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+    restart: unless-stopped
+
   payments:
     container_name: dist_sys_payments
     build: ./payments
