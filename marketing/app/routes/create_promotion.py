@@ -32,12 +32,12 @@ def create_promotion():
 
     rabbitmq_manager = RabbitMQManager()
     rabbitmq_manager.publish_promotion(
-        routing_key=current_app.config['LOGS_ROUTINGKEY'], 
+        routing_key=current_app.config['LOGS_ROUTING_KEY'], 
         message=f"Creating promotion to destination {data["destination_id"]}", 
         headers={"sender": "promotions"}
     )
 
-    routing_key = str(current_app.config['PROMOTIONS_ROUTINGKEY']) + f".{data["destination_id"]}"
+    routing_key = str(current_app.config['MARKETING_ROUTING_KEY']) + f".{data["destination_id"]}"
 
     rabbitmq_manager.publish_promotion(
         routing_key= routing_key,

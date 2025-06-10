@@ -16,6 +16,7 @@ class Config:
 
     # API Keys
     ITINERARY_MS_PORT = os.getenv("ITINERARY_MS_PORT")
+    API_PORT = os.getenv("API_PORT")
 
     @classmethod
     def validate(cls):
@@ -27,7 +28,8 @@ class Config:
             cls.LOGS_ROUTING_KEY,
             cls.BOOKING_CREATED_ROUTING_KEY,
             cls.BOOKING_CANCELLED_ROUTING_KEY,
-            cls.ITINERARY_MS_PORT
+            cls.ITINERARY_MS_PORT,
+            cls.API_PORT
         ]
         if not all(required_vars):
             raise EnvironmentError("One or more required environment variables are missing.")

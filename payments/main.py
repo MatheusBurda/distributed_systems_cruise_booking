@@ -20,12 +20,12 @@ RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
 RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
 
 # Routing Keys
-LOGS_ROUTINGKEY = os.getenv("LOGS_ROUTINGKEY")
-PAYMENT_REJECTED_ROUTINGKEY=os.getenv("PAYMENT_REJECTED_ROUTINGKEY")
-PAYMENT_ACCEPTED_ROUTINGKEY=os.getenv("PAYMENT_ACCEPTED_ROUTINGKEY")
-RESERVATION_CREATED_ROUTINGKEY = os.getenv("RESERVATION_CREATED_ROUTINGKEY")
+LOGS_ROUTING_KEY = os.getenv("LOGS_ROUTING_KEY")
+PAYMENT_REJECTED_ROUTING_KEY=os.getenv("PAYMENT_REJECTED_ROUTING_KEY")
+PAYMENT_ACCEPTED_ROUTING_KEY=os.getenv("PAYMENT_ACCEPTED_ROUTING_KEY")
+RESERVATION_CREATED_ROUTING_KEY = os.getenv("RESERVATION_CREATED_ROUTING_KEY")
 
-if not all([RABBITMQ_USER, RABBITMQ_PASS, RABBITMQ_HOST, RABBITMQ_PORT, RESERVATION_CREATED_ROUTINGKEY]):
+if not all([RABBITMQ_USER, RABBITMQ_PASS, RABBITMQ_HOST, RABBITMQ_PORT, RESERVATION_CREATED_ROUTING_KEY]):
     raise EnvironmentError("One or more required environment variables are missing.")
 ##############################################################
 
@@ -35,7 +35,7 @@ def callback(ch, method, properties, body):
 
     channel.basic_publish(
         exchange="direct", 
-        routing_key=LOGS_ROUTINGKEY, 
+        routing_key=LOGS_ROUTING_KEY, 
         body=f"Reservation Created Received".encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "payments"})
     )
@@ -48,7 +48,7 @@ def callback(ch, method, properties, body):
 
         channel.basic_publish(
             exchange="direct", 
-            routing_key=PAYMENT_REJECTED_ROUTINGKEY, 
+            routing_key=PAYMENT_REJECTED_ROUTING_KEY, 
             body=json_body.encode("utf-8"), 
             properties=pika.BasicProperties(headers={"sender": "payments"})
         )
@@ -59,7 +59,7 @@ def callback(ch, method, properties, body):
 
         channel.basic_publish(
             exchange="direct", 
-            routing_key=PAYMENT_ACCEPTED_ROUTINGKEY, 
+            routing_key=PAYMENT_ACCEPTED_ROUTING_KEY, 
             body=json_body.encode("utf-8"), 
             properties=pika.BasicProperties(headers={"sender": "payments"})
         )
@@ -76,7 +76,7 @@ channel.exchange_declare(exchange="direct", exchange_type="direct")
 # Reservation Created Queue ->  consumer
 queue_name = "reservation_created_queue_payments"
 channel.queue_declare(queue=queue_name, durable=True)
-channel.queue_bind(exchange="direct", queue=queue_name, routing_key=RESERVATION_CREATED_ROUTINGKEY)
+channel.queue_bind(exchange="direct", queue=queue_name, routing_key=RESERVATION_CREATED_ROUTING_KEY)
 channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
 
 print("Finished setup. \nStart consuming...")

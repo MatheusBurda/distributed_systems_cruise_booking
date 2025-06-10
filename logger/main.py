@@ -17,9 +17,9 @@ RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
 RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
 
 # Routing Keys
-LOGS_ROUTINGKEY = os.getenv("LOGS_ROUTINGKEY")
+LOGS_ROUTING_KEY = os.getenv("LOGS_ROUTING_KEY")
 
-if not all([RABBITMQ_USER, RABBITMQ_PASS, RABBITMQ_HOST, RABBITMQ_PORT, LOGS_ROUTINGKEY]):
+if not all([RABBITMQ_USER, RABBITMQ_PASS, RABBITMQ_HOST, RABBITMQ_PORT, LOGS_ROUTING_KEY]):
     raise EnvironmentError("One or more required environment variables are missing.")
 ##############################################################
 
@@ -41,7 +41,7 @@ channel.exchange_declare(exchange="direct", exchange_type="direct")
 
 queue_name = "logger_queue"
 channel.queue_declare(queue=queue_name, durable=True)
-channel.queue_bind(exchange="direct", queue=queue_name, routing_key=LOGS_ROUTINGKEY)
+channel.queue_bind(exchange="direct", queue=queue_name, routing_key=LOGS_ROUTING_KEY)
 channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
 
 print("Finished setup. Start consuming...")

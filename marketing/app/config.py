@@ -10,10 +10,10 @@ class Config:
     RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
     
     # Routing Keys
-    LOGS_ROUTINGKEY = os.getenv("LOGS_ROUTINGKEY")
-    PROMOTIONS_ROUTINGKEY = os.getenv("PROMOTIONS_ROUTINGKEY")
+    LOGS_ROUTING_KEY = os.getenv("LOGS_ROUTING_KEY")
+    MARKETING_ROUTING_KEY = os.getenv("MARKETING_ROUTING_KEY")
 
-    PROMOTIONS_API_PORT = os.getenv("PROMOTIONS_API_PORT")
+    MARKETING_API_PORT = os.getenv("MARKETING_API_PORT")
 
     @classmethod
     def validate(cls):
@@ -22,9 +22,9 @@ class Config:
             cls.RABBITMQ_PASS,
             cls.RABBITMQ_HOST,
             cls.RABBITMQ_PORT,
-            cls.LOGS_ROUTINGKEY,
-            cls.PROMOTIONS_ROUTINGKEY,
-            cls.PROMOTIONS_API_PORT
+            cls.LOGS_ROUTING_KEY,
+            cls.MARKETING_ROUTING_KEY,
+            cls.MARKETING_API_PORT
         ]
         if not all(required_vars):
             raise EnvironmentError("One or more required environment variables are missing.")

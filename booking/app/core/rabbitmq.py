@@ -2,7 +2,7 @@ import pika
 import threading
 import json
 from flask import current_app
-from app.core.data_manager import DataManager
+from booking.app.services.data_manager import DataManager
 
 class RabbitMQManager:
     _instance = None

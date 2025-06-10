@@ -23,4 +23,4 @@ if __name__ == "__main__":
         rabbitmq_manager = RabbitMQManager()
     
     print("Promotions service started")
-    app.run(host="0.0.0.0", port=int(Config.PROMOTIONS_API_PORT))
+    app.run(host="0.0.0.0", port=int(Config.MARKETING_API_PORT))

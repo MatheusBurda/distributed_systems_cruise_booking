@@ -16,8 +16,6 @@ load_dotenv()
 ##############################################################
 #                ENVS and DEFAULT_VALUES
 ##############################################################
-PERCENTAGE_ERROR = 40 # %
-
 # RabbitMQ infos
 RABBITMQ_USER = os.getenv("RABBITMQ_USER")
 RABBITMQ_PASS = os.getenv("RABBITMQ_PASS")
@@ -25,22 +23,22 @@ RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
 RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
 
 # Routing Keys
-LOGS_ROUTINGKEY = os.getenv("LOGS_ROUTINGKEY")
-PAYMENT_REJECTED_ROUTINGKEY=os.getenv("PAYMENT_REJECTED_ROUTINGKEY")
-PAYMENT_ACCEPTED_ROUTINGKEY=os.getenv("PAYMENT_ACCEPTED_ROUTINGKEY")
-TICKET_GENERATED_ROUTINGKEY=os.getenv("TICKET_GENERATED_ROUTINGKEY")
-RESERVATION_CREATED_ROUTINGKEY = os.getenv("RESERVATION_CREATED_ROUTINGKEY")
+LOGS_ROUTING_KEY = os.getenv("LOGS_ROUTING_KEY")
+PAYMENT_REJECTED_ROUTING_KEY=os.getenv("PAYMENT_REJECTED_ROUTING_KEY")
+PAYMENT_ACCEPTED_ROUTING_KEY=os.getenv("PAYMENT_ACCEPTED_ROUTING_KEY")
+TICKET_GENERATED_ROUTING_KEY=os.getenv("TICKET_GENERATED_ROUTING_KEY")
+RESERVATION_CREATED_ROUTING_KEY = os.getenv("RESERVATION_CREATED_ROUTING_KEY")
 
 if not all([
     RABBITMQ_USER, 
     RABBITMQ_PASS, 
     RABBITMQ_HOST, 
     RABBITMQ_PORT, 
-    RESERVATION_CREATED_ROUTINGKEY, 
-    LOGS_ROUTINGKEY, 
-    PAYMENT_REJECTED_ROUTINGKEY, 
-    PAYMENT_ACCEPTED_ROUTINGKEY, 
-    TICKET_GENERATED_ROUTINGKEY
+    RESERVATION_CREATED_ROUTING_KEY, 
+    LOGS_ROUTING_KEY, 
+    PAYMENT_REJECTED_ROUTING_KEY, 
+    PAYMENT_ACCEPTED_ROUTING_KEY, 
+    TICKET_GENERATED_ROUTING_KEY
     ]):
     raise EnvironmentError("One or more required environment variables are missing.")
 
@@ -53,7 +51,7 @@ def payment_accepted_callback(ch, method, properties, body):
 
     ch.basic_publish(
         exchange="direct", 
-        routing_key=LOGS_ROUTINGKEY, 
+        routing_key=LOGS_ROUTING_KEY, 
         body=f"Payment Accepted Received".encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "reservation"})
     )
@@ -65,7 +63,7 @@ def payment_accepted_callback(ch, method, properties, body):
     if not verify_signature(value=transaction_str, sig=signature):
         ch.basic_publish(
             exchange="direct", 
-            routing_key=LOGS_ROUTINGKEY, 
+            routing_key=LOGS_ROUTING_KEY, 
             body=f"ERROR: Payment accepted - signature invalid! transaction_id: {transaction["id"]} for reservation_id {transaction["reservation_id"]}".encode("utf-8"), 
             properties=pika.BasicProperties(headers={"sender": "reservation"})
         )
@@ -81,7 +79,7 @@ def payment_rejected_callback(ch, method, properties, body):
 
     ch.basic_publish(
         exchange="direct", 
-        routing_key=LOGS_ROUTINGKEY, 
+        routing_key=LOGS_ROUTING_KEY, 
         body=f"Payment Rejected Received".encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "reservation"})
     )
@@ -93,7 +91,7 @@ def payment_rejected_callback(ch, method, properties, body):
     if not verify_signature(value=transaction_str, sig=signature):
         ch.basic_publish(
             exchange="direct", 
-            routing_key=LOGS_ROUTINGKEY, 
+            routing_key=LOGS_ROUTING_KEY, 
             body=f"ERROR: Payment rejected signature invalid! transaction_id: {transaction["id"]} for reservation_id {transaction["reservation_id"]}".encode("utf-8"), 
             properties=pika.BasicProperties(headers={"sender": "reservation"})
         )
@@ -110,7 +108,7 @@ def ticket_generated_callback(ch, method, properties, body):
 
     ch.basic_publish(
         exchange="direct", 
-        routing_key=LOGS_ROUTINGKEY, 
+        routing_key=LOGS_ROUTING_KEY, 
         body=f"Tickets Created Received".encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "reservation"})
     )
@@ -145,19 +143,19 @@ channel.exchange_declare(exchange="direct", exchange_type="direct")
 # Payment Accepted Queue ->  consumer
 queue_name = "payment_accepted_reservation"
 channel.queue_declare(queue=queue_name, durable=True)
-channel.queue_bind(exchange="direct", queue=queue_name, routing_key=PAYMENT_ACCEPTED_ROUTINGKEY)
+channel.queue_bind(exchange="direct", queue=queue_name, routing_key=PAYMENT_ACCEPTED_ROUTING_KEY)
 channel.basic_consume(queue=queue_name, on_message_callback=payment_accepted_callback, auto_ack=True)
 
 # Payment Rejected Queue ->  consumer
 queue_name = "payment_rejected_reservation"
 channel.queue_declare(queue=queue_name, durable=True)
-channel.queue_bind(exchange="direct", queue=queue_name, routing_key=PAYMENT_REJECTED_ROUTINGKEY)
+channel.queue_bind(exchange="direct", queue=queue_name, routing_key=PAYMENT_REJECTED_ROUTING_KEY)
 channel.basic_consume(queue=queue_name, on_message_callback=payment_rejected_callback, auto_ack=True)
 
 # Ticket Generated Queue ->  consumer
 queue_name = "ticket_created_reservation"
 channel.queue_declare(queue=queue_name, durable=True)
-channel.queue_bind(exchange="direct", queue=queue_name, routing_key=TICKET_GENERATED_ROUTINGKEY)
+channel.queue_bind(exchange="direct", queue=queue_name, routing_key=TICKET_GENERATED_ROUTING_KEY)
 channel.basic_consume(queue=queue_name, on_message_callback=ticket_generated_callback, auto_ack=True)
 
 print("Finished setup. All queues declared")
@@ -266,14 +264,14 @@ def create_reservation():
     channel = get_flask_rabbitmq_channel()
     channel.basic_publish(
         exchange="direct", 
-        routing_key=LOGS_ROUTINGKEY, 
+        routing_key=LOGS_ROUTING_KEY, 
         body=f"creating reservation with id {reservation_id}".encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "reservation"})
     )
 
     channel.basic_publish(
         exchange="direct", 
-        routing_key=RESERVATION_CREATED_ROUTINGKEY, 
+        routing_key=RESERVATION_CREATED_ROUTING_KEY, 
         body=json.dumps(reservation).encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "reservation"})
     )

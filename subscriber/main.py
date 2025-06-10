@@ -15,16 +15,16 @@ RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
 RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
 
 # Routing Keys
-LOGS_ROUTINGKEY = os.getenv("LOGS_ROUTINGKEY")
-PROMOTIONS_ROUTINGKEY=os.getenv("PROMOTIONS_ROUTINGKEY")
+LOGS_ROUTING_KEY = os.getenv("LOGS_ROUTING_KEY")
+MARKETING_ROUTING_KEY=os.getenv("MARKETING_ROUTING_KEY")
 
 if not all([
     RABBITMQ_USER, 
     RABBITMQ_PASS, 
     RABBITMQ_HOST, 
     RABBITMQ_PORT, 
-    PROMOTIONS_ROUTINGKEY, 
-    LOGS_ROUTINGKEY, 
+    MARKETING_ROUTING_KEY, 
+    LOGS_ROUTING_KEY, 
     ]):
     raise EnvironmentError("One or more required environment variables are missing.")
 
@@ -62,7 +62,7 @@ channel.exchange_declare(exchange="promotions_topic", exchange_type="topic")
 
 # Subscriber Queue to receive promotions from destination with id 7
 queue_name = "subscriber_queue_destination_id_7"
-routing_key = str(PROMOTIONS_ROUTINGKEY) + f".7"
+routing_key = str(MARKETING_ROUTING_KEY) + f".7"
 channel.queue_declare(queue=queue_name, durable=True)
 channel.queue_bind(exchange="promotions_topic", queue=queue_name, routing_key=routing_key)
 channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
@@ -70,7 +70,7 @@ print(f"Queue {queue_name} subscribed to {routing_key}")
 
 # Subscriber Queue to receive promotions from destination with id 22
 queue_name = "subscriber_queue_destination_id_22"
-routing_key = str(PROMOTIONS_ROUTINGKEY) + f".22"
+routing_key = str(MARKETING_ROUTING_KEY) + f".22"
 channel.queue_declare(queue=queue_name, durable=True)
 channel.queue_bind(exchange="promotions_topic", queue=queue_name, routing_key=routing_key)
 channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
@@ -78,7 +78,7 @@ print(f"Queue {queue_name} subscribed to {routing_key}")
 
 # Subscriber Queue to receive promotions from all destinations 
 queue_name = "subscriber_queue_destination_all"
-routing_key = str(PROMOTIONS_ROUTINGKEY) + f".#"
+routing_key = str(MARKETING_ROUTING_KEY) + f".#"
 channel.queue_declare(queue=queue_name, durable=True)
 channel.queue_bind(exchange="promotions_topic", queue=queue_name, routing_key=routing_key)
 channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
