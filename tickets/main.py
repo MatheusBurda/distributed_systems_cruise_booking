@@ -1,8 +1,6 @@
 import base64
-import enum
 import os
 import json
-import time
 import uuid
 import pika
 from dotenv import load_dotenv
