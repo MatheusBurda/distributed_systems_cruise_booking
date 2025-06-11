@@ -3,7 +3,9 @@ import os
 import json
 import uuid
 import pika
+from datetime import datetime, UTC
 from dotenv import load_dotenv
+from models import Ticket, TicketBookingResponse
 
 from crypto_verify import verify_signature
 
@@ -62,17 +64,27 @@ def payment_accepted_callback(ch, method, properties, body):
         properties=pika.BasicProperties(headers={"sender": "ticket"})
     )
 
-    tickets = [{"id": i, "uuid": str(uuid.uuid4())} for i in range(transaction["tickets_num"])]
+    # Create tickets with minimal information
+    tickets = []
+    for i in range(transaction["tickets_num"]):
+        ticket = Ticket(
+            id=i,
+            uuid=uuid.uuid4(),
+            booking_id=transaction["reservation_id"],
+            cabin_number=transaction.get("cabin_number", "Unknown"),
+            departure_date=datetime.fromisoformat(transaction.get("departure_date", datetime.now(UTC).isoformat()))
+        )
+        tickets.append(ticket)
 
-    return_dict = {
-        "tickets": tickets,
-        "reservation_id": transaction["reservation_id"]
-    }
+    ticket_response = TicketBookingResponse(
+        tickets=tickets,
+        reservation_id=transaction["reservation_id"]
+    )
 
     ch.basic_publish(
         exchange="direct", 
         routing_key=TICKET_GENERATED_ROUTING_KEY, 
-        body=json.dumps(return_dict).encode("utf-8"), 
+        body=ticket_response.model_dump_json().encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "ticket"})
     )
 
