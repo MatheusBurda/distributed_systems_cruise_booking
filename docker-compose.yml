@@ -31,9 +31,9 @@ services:
       - .env
     restart: unless-stopped
 
-  reservation:
-    container_name: dist_sys_reservation
-    build: ./reservation
+  booking:
+    container_name: dist_sys_booking
+    build: ./booking
     ports:
       - "1234:1234"
     depends_on:
@@ -62,6 +62,22 @@ services:
   payments:
     container_name: dist_sys_payments
     build: ./payments
+    ports:
+      - "1237:1237"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_dist_sys_network
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  payments_api:
+    container_name: dist_sys_payments_api
+    build: ./payments_api
+    ports:
+      - "1238:1238"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -83,9 +99,9 @@ services:
       - .env
     restart: unless-stopped
 
-  promotions:
-    container_name: dist_sys_promotions
-    build: ./promotions
+  marketing:
+    container_name: dist_sys_marketing
+    build: ./marketing
     ports:
       - "1235:1235"
     depends_on:
@@ -97,27 +113,15 @@ services:
       - .env
     restart: unless-stopped
 
-  subscriber:
-    container_name: dist_sys_subscriber
-    build: ./subscriber
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - shared_dist_sys_network
-    env_file:
-      - .env
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: dist_sys_frontend
-    ports:
-      - "5173:80"
-    depends_on:
-      - rabbitmq
-    networks:
-      - shared_dist_sys_network
-    restart: unless-stopped
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: dist_sys_frontend
+  #   ports:
+  #     - "5173:80"
+  #   depends_on:
+  #     - rabbitmq
+  #   networks:
+  #     - shared_dist_sys_network
+  #   restart: unless-stopped

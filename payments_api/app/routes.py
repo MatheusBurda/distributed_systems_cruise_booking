@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from .services import payment_service
-from .models import PaymentRequest, CreditCardInfo, PaymentLink
-from datetime import datetime, timedelta, UTC
+from .models import CreditCardInfo
 from .config import Config
 
 payment_bp = Blueprint('payment', __name__)
@@ -57,7 +56,6 @@ def process_payment_with_link(payment_link_id):
                 holder_name=data['holder_name']
             )
         )
-        
         return jsonify(payment.to_dict()), 200
 
     except ValueError as e:
@@ -65,6 +63,7 @@ def process_payment_with_link(payment_link_id):
     except Exception as e:
         current_app.logger.error(f"Error processing payment: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+
 
 @payment_bp.route('/payment/<payment_id>', methods=['GET'])
 def get_payment(payment_id):

@@ -1,3 +1,7 @@
 pika
-dotenv
+python-dotenv
+flask
+flask-cors
+requests
 rsa
+pydantic
