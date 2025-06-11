@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+from app.models import Itinerary
 
 class DataManager:
     """
@@ -7,23 +9,7 @@ class DataManager:
     """
     _instance = None
     _initialized = False
-
-    # Data structure:
-    #   {
-    #     "id": 99,
-    #     "destination": "Mar Adriático",
-    #     "origin": "Veneza",
-    #     "ship_name": "Costa Deliziosa",
-    #     "return_port": "Veneza",
-    #     "places_visited": ["Veneza", "Split", "Bari", "Dubrovnik", "Koper"],
-    #     "number_of_nights": 7,
-    #     "cabin_cost": 4150.0,
-    #     "cabin_capacity": 2,
-    #     "trip_continent": "Europa",
-    #     "date": "2026-09-15",
-    #     "available_cabins": 5
-    #   }
-    data = None
+    data: list[Itinerary] = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -34,22 +20,24 @@ class DataManager:
         if not DataManager._initialized:
             try:
                 with open("./itinerarios_portugues.json", "r", encoding="utf-8") as file:
-                    self.data = json.load(file)
+                    raw_data = json.load(file)
                 
-                if (not self.data):
+                if (not raw_data):
                     raise Exception("No data loaded from itinerary file")
+                
+                self.data = [Itinerary(**item) for item in raw_data]
                 
                 DataManager._initialized = True
             except Exception as e:
                 print(f"Failed loading itinerary file {e}")
 
-    def get_itinerary_by_id(self, itinerary_id: int) -> dict:
+    def get_itinerary_by_id(self, itinerary_id: int) -> Itinerary:
         for itinerary in self.data:
-            if itinerary["id"] == itinerary_id:
+            if itinerary.id == itinerary_id:
                 return itinerary
         return None
 
-    def get_itineraries(self):
+    def get_itineraries(self) -> list[Itinerary]:
         return self.data
 
     def _normalize_text(self, text: str) -> str:
@@ -57,8 +45,7 @@ class DataManager:
         import unicodedata
         return unicodedata.normalize('NFKD', text.lower()).encode('ASCII', 'ignore').decode('ASCII')
     
-
-    def filter_itineraries(self, filters: dict) -> list:
+    def filter_itineraries(self, filters: dict) -> list[Itinerary]:
         """
         Filter itineraries based on multiple criteria.
         
@@ -72,36 +59,35 @@ class DataManager:
                 - continent (str): Trip continent
         
         Returns:
-            list: Filtered list of itineraries
+            list[Itinerary]: Filtered list of itineraries
         """
         itineraries = self.data
-
         filters_itineraries = []
 
         if filters['origin'] is not None:
-            filters_itineraries.append(lambda x: x['origin'] == filters['origin'])
+            filters_itineraries.append(lambda x: x.origin == filters['origin'])
 
         if filters['destination'] is not None:
-            filters_itineraries.append(lambda x: x['destination'] == filters['destination'])
+            filters_itineraries.append(lambda x: x.destination == filters['destination'])
 
         if filters['places_visited'] is not None:
             filters_itineraries.append(lambda x: set(self._normalize_text(place) for place in filters['places_visited']).issubset(
-                set(self._normalize_text(place) for place in x['places_visited'])))
+                set(self._normalize_text(place) for place in x.places_visited)))
 
         if filters['date'] is not None:
-            filters_itineraries.append(lambda x: x['date'] == filters['date'])
+            filters_itineraries.append(lambda x: x.date == datetime.strptime(filters['date'], "%Y-%m-%d").date())
 
         if filters['min_cabins'] is not None:
-            filters_itineraries.append(lambda x: x['available_cabins'] >= filters['min_cabins'])
+            filters_itineraries.append(lambda x: x.available_cabins >= filters['min_cabins'])
 
         if filters['continent'] is not None:
-            filters_itineraries.append(lambda x: x['trip_continent'].lower() == filters['continent'].lower())
+            filters_itineraries.append(lambda x: x.trip_continent.lower() == filters['continent'].lower())
 
         filtered_itineraries = [item for item in itineraries if all(f(item) for f in filters_itineraries)]
             
         return filtered_itineraries
     
-    def register_booking(self, destination_id, cabins):
+    def register_booking(self, destination_id: int, cabins: int) -> bool:
         """
         Register a booking by removing the specified number of cabins from the destination.
         
@@ -110,12 +96,14 @@ class DataManager:
             cabins (int): Number of cabins to book
         """
         for itinerary in self.data:
-            if itinerary['id'] == destination_id:
-                itinerary['available_cabins'] -= cabins
-                return True
+            if itinerary.id == destination_id:
+                if itinerary.available_cabins >= cabins:
+                    itinerary.available_cabins -= cabins
+                    return True
+                return False
         return False
 
-    def register_cancellation(self, destination_id, cabins):
+    def register_cancellation(self, destination_id: int, cabins: int) -> bool:
         """
         Register a cancellation by adding the specified number of cabins to the destination.
         
@@ -124,7 +112,7 @@ class DataManager:
             cabins (int): Number of cabins to cancel
         """
         for itinerary in self.data:
-            if itinerary['id'] == destination_id:
-                itinerary['available_cabins'] += cabins
+            if itinerary.id == destination_id:
+                itinerary.available_cabins += cabins
                 return True
         return False

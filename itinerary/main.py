@@ -19,9 +19,9 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    data_manager = DataManager()
     
     with app.app_context():
+        data_manager = DataManager()
         rabbitmq_manager = RabbitMQManager()
     
     print("Itinerary service started")
