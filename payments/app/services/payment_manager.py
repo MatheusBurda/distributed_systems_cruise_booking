@@ -33,17 +33,20 @@ class PaymentManager:
                 f'http://payments_api:{current_app.config["PAYMENT_API_PORT"]}/payment-link',
                 json={
                     "amount": amount,
+                    "currency": "USD",
                     "customer_email": customer_email,
                     "customer_name": customer_name,
                     "payment_id": payment.id
                 }
             )
             
-            if response.status_code != 200:
-                raise Exception({"error": "Failed to create payment link", "code": 500})
+            if response.status_code != 201:
+                raise Exception({"error": f"Failed to create payment link: {response.json()}", "code": response.status_code})
                 
             payment_data = response.json()
-            payment.payment_link = payment_data.get("payment_link", "")
+            payment.payment_link = payment_data.get("payment_url", "")
+            payment.payment_link_id = payment_data.get("payment_link_id", "")
+            payment.payment_expires_at = payment_data.get("expires_at", "")
             
         except requests.RequestException as e:
             raise Exception({"error": f"Payment API error: {str(e)}", "code": 500})

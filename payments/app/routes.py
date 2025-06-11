@@ -80,5 +80,6 @@ def get_payment_link():
         }), 201
         
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
     

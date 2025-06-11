@@ -20,6 +20,7 @@ class Config:
 
     # API Keys
     ITINERARY_MS_PORT = os.getenv("ITINERARY_MS_PORT")
+    PAYMENT_MS_PORT = os.getenv("PAYMENT_MS_PORT")
     API_PORT = os.getenv("API_PORT")
 
     @classmethod
@@ -35,6 +36,7 @@ class Config:
             cls.TICKET_GENERATED_ROUTING_KEY,
             cls.MARKETING_ROUTING_KEY,
             cls.ITINERARY_MS_PORT,
+            cls.PAYMENT_MS_PORT,
             cls.API_PORT,
             cls.BOOKING_CREATED_ROUTING_KEY,
             cls.BOOKING_CANCELLED_ROUTING_KEY

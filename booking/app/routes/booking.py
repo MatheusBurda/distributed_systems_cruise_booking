@@ -1,5 +1,6 @@
 import json
-from flask import Blueprint, request, jsonify
+import requests
+from flask import Blueprint, request, jsonify, current_app
 
 from app.services.booking_manager import BookingsManager
 from app.core.rabbitmq import RabbitMQManager
@@ -30,9 +31,35 @@ def create_booking():
             "customer_email": booking.customer_email,
             "customer_name": booking.customer_name
         }))
+
+        payment_link = None
+        try:
+            payment_response = requests.post(
+                f'http://payments:{current_app.config["PAYMENT_MS_PORT"]}/payment-link',
+                json={
+                    "booking_id": booking.id,
+                    "amount": booking.total_cost,
+                    "customer_email": booking.customer_email,
+                    "customer_name": booking.customer_name
+                }
+            )
+            
+            if payment_response.status_code == 201:
+                payment_data = payment_response.json()
+                payment_link = payment_data.get("payment", {}).get("payment_link")
+            else:
+                print(f"Failed to get payment link: {payment_response.status_code}")
+                
+        except requests.RequestException as e:
+            print(f"Error calling payments service: {str(e)}")
+
+        booking_response = booking.to_dict()
+        booking_response["payment_link"] = payment_link
+            
     except Exception as e:
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
-    return jsonify(booking.to_dict())
+    
+    return jsonify(booking_response)
 
 
 @bookings_bp.route("/bookings/<booking_id>", methods=["DELETE"])

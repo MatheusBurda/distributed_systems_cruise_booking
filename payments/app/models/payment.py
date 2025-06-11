@@ -10,6 +10,8 @@ class Payment(BaseModel):
     customer_name: str
     status: str = "pending"
     payment_link: Optional[str] = None
+    payment_link_id: Optional[str] = None
+    payment_expires_at: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -26,6 +28,8 @@ class Payment(BaseModel):
             "customer_name": self.customer_name,
             "status": self.status,
             "payment_link": self.payment_link,
+            "payment_link_id": self.payment_link_id,
+            "payment_expires_at": self.payment_expires_at,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat()
         } 
