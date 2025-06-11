@@ -1,0 +1,17 @@
+from pydantic import BaseModel, Field
+from uuid import UUID
+from datetime import datetime, UTC
+from typing import List
+
+class Ticket(BaseModel):
+    id: int
+    uuid: UUID
+    booking_id: str
+    cabin_number: str
+    departure_date: datetime
+    issued_at: datetime = Field(default_factory=lambda: datetime.now(UTC)) 
+
+class TicketBookingResponse(BaseModel):
+    tickets: List[Ticket]
+    reservation_id: str
+    issued_at: datetime = Field(default_factory=lambda: datetime.now(UTC)) 
