@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 from pydantic import BaseModel, Field
 from typing import List
 from datetime import date
 
-@dataclass
+
 class Itinerary(BaseModel):
     id: int
     destination: str
@@ -19,4 +18,8 @@ class Itinerary(BaseModel):
     available_cabins: int = Field(ge=0)
 
     def to_dict(self):
-        return self.model_dump()
+        data = self.model_dump()
+        data['date'] = self.date.isoformat()
+        return data
+    
+    

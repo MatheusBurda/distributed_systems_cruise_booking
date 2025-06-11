@@ -24,9 +24,9 @@ class DataManager:
                 
                 if (not raw_data):
                     raise Exception("No data loaded from itinerary file")
-                
+
                 self.data = [Itinerary(**item) for item in raw_data]
-                
+
                 DataManager._initialized = True
             except Exception as e:
                 print(f"Failed loading itinerary file {e}")
@@ -34,11 +34,11 @@ class DataManager:
     def get_itinerary_by_id(self, itinerary_id: int) -> Itinerary:
         for itinerary in self.data:
             if itinerary.id == itinerary_id:
-                return itinerary
+                return itinerary.to_dict()
         return None
 
     def get_itineraries(self) -> list[Itinerary]:
-        return self.data
+        return [item.to_dict() for item in self.data]
 
     def _normalize_text(self, text: str) -> str:
         """Remove accents and convert to lowercase for text comparison."""
@@ -83,7 +83,7 @@ class DataManager:
         if filters['continent'] is not None:
             filters_itineraries.append(lambda x: x.trip_continent.lower() == filters['continent'].lower())
 
-        filtered_itineraries = [item for item in itineraries if all(f(item) for f in filters_itineraries)]
+        filtered_itineraries = [item.to_dict() for item in itineraries if all(f(item) for f in filters_itineraries)]
             
         return filtered_itineraries
     
