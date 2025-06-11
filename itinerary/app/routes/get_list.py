@@ -19,3 +19,8 @@ def get_itineraries():
     itineraries = data_manager.filter_itineraries(filters)
     
     return jsonify(itineraries)
+
+@itineraries_bp.route("/itineraries/<int:itinerary_id>", methods=["GET"])
+def get_itinerary_by_id(itinerary_id: int):
+    itinerary = data_manager.get_itinerary_by_id(itinerary_id)
+    return jsonify(itinerary)

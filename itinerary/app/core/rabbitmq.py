@@ -137,14 +137,6 @@ class RabbitMQManager:
             self._setup_exchanges()
         return self._channel
 
-    # def publish_message(self, routing_key: str, message: str, headers: dict = None):
-    #     self.channel.basic_publish(
-    #         exchange="direct",
-    #         routing_key=routing_key,
-    #         body=message.encode("utf-8"),
-    #         properties=pika.BasicProperties(headers=headers or {})
-    #     )
-
     def stop(self):
         self._running = False
         if self._connection and not self._connection.is_closed:
