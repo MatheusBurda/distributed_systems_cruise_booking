@@ -1,8 +1,7 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional
 from enum import Enum
-from pydantic import BaseModel
-
+from dataclasses import dataclass
 class PaymentStatus(Enum):
     PENDING = "pending"
     AUTHORIZED = "authorized"
@@ -10,20 +9,33 @@ class PaymentStatus(Enum):
     CANCELLED = "cancelled"
     EXPIRED = "expired"
 
-class CreditCardInfo(BaseModel):
+@dataclass
+class CreditCardInfo:
     number: str
     expiry_month: int
     expiry_year: int
     cvv: str
+    holder_name: str
 
-class PaymentRequest(BaseModel):
+@dataclass
+class PaymentRequest:
     amount: float
     currency: str
     card_info: CreditCardInfo
     customer_email: str
 
+@dataclass
+class PaymentLink:
+    id: str
+    amount: float
+    currency: str
+    customer_email: str
+    created_at: datetime
+    expires_at: datetime
+    is_used: bool = False
 
-class Payment(BaseModel):
+@dataclass
+class Payment:
     id: str
     amount: float
     currency: str

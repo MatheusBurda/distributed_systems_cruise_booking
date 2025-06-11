@@ -14,6 +14,8 @@ class Booking(BaseModel):
     boarding_date: str
     number_of_cabins: int
     total_cost: float
+    customer_email: str
+    customer_name: str
     status: BookingStatus = BookingStatus.CREATED
     payment_status: PaymentStatus = PaymentStatus.PENDING
     payment_id: Optional[str] = None
@@ -67,6 +69,8 @@ class Booking(BaseModel):
             "boarding_date": self.boarding_date,
             "number_of_cabins": self.number_of_cabins,
             "total_cost": self.total_cost,
+            "customer_email": self.customer_email,
+            "customer_name": self.customer_name,
             "status": str(self.status.value),
             "payment_status": str(self.payment_status.value),
             "payment_id": self.payment_id,

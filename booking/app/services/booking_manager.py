@@ -43,7 +43,9 @@ class BookingsManager:
                        destination_id: int, 
                        number_of_cabins: int, 
                        number_of_passengers: int, 
-                       origin: str, 
+                       origin: str,
+                       customer_email: str,
+                       customer_name: str
                     ) -> Optional[Booking]:
         
         itinerary = self.get_itinerary(destination_id)
@@ -60,6 +62,8 @@ class BookingsManager:
             boarding_date=boarding_date,
             number_of_cabins=number_of_cabins,
             total_cost=itinerary.cabin_cost * number_of_cabins,
+            customer_email=customer_email,
+            customer_name=customer_name,
             status=BookingStatus.CREATED,
             payment_status=PaymentStatus.PENDING
         )

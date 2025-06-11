@@ -4,19 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    RABBITMQ_USER = os.getenv("RABBITMQ_USER")
-    RABBITMQ_PASS = os.getenv("RABBITMQ_PASS")
-    RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
-    RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
-    
-    # Routing Keys
-    LOGS_ROUTING_KEY = os.getenv("LOGS_ROUTING_KEY")
-    BOOKING_CREATED_ROUTING_KEY = os.getenv("BOOKING_CREATED_ROUTING_KEY")
-    BOOKING_CANCELLED_ROUTING_KEY = os.getenv("BOOKING_CANCELLED_ROUTING_KEY")
-
-    # API Keys
-    ITINERARY_MS_PORT = os.getenv("ITINERARY_MS_PORT")
     PAYMENT_MS_PORT = os.getenv("PAYMENT_MS_PORT")
+    FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-123')
     PAYMENT_WEBHOOK_URL = os.getenv('PAYMENT_WEBHOOK_URL', f'http://payments:{PAYMENT_MS_PORT}/webhook')

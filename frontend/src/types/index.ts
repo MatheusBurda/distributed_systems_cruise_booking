@@ -25,6 +25,8 @@ export interface Reservation {
   number_of_cabins: number;
   number_of_passengers: number;
   origin: string;
+  customer_email: string;
+  customer_name: string;
   status: "PAID" | "REJECTED";
   total_cost: number;
   tickets?: Ticket[];
@@ -36,6 +38,8 @@ export interface BookingFormData {
   destination_id: number;
   number_of_cabins: number;
   origin: string;
+  customer_email: string;
+  customer_name: string;
 }
 
 export interface PromotionFormData {
