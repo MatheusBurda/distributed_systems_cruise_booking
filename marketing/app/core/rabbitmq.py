@@ -1,3 +1,4 @@
+import time
 import pika
 from flask import current_app
 
@@ -36,10 +37,16 @@ class RabbitMQManager:
 
     @property
     def channel(self):
-        if not self._channel or self._channel.is_closed:
-            self._connection = self._create_connection()
-            self._channel = self._connection.channel()
-            self._setup_exchanges()
+        while True:
+            try:
+                if not self._channel or self._channel.is_closed:
+                    self._connection = self._create_connection()
+                    self._channel = self._connection.channel()
+                    self._setup_exchanges()
+                break
+            except Exception as e:
+                print(f"Failed to establish connection: {e}")
+                time.sleep(1)
         return self._channel
 
     def publish_promotion(self, routing_key: str, message: str, headers: dict = None):

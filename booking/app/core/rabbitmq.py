@@ -1,5 +1,6 @@
 import base64
 import json
+import time
 import pika
 import threading
 
@@ -154,10 +155,16 @@ class RabbitMQManager:
 
     @property
     def channel(self):
-        if not self._channel or self._channel.is_closed:
-            self._connection = self._create_connection()
-            self._channel = self._connection.channel()
-            self._setup()
+        while True:
+            try:
+                if not self._channel or self._channel.is_closed:
+                    self._connection = self._create_connection()
+                    self._channel = self._connection.channel()
+                    self._setup()
+                break
+            except Exception as e:
+                print(f"Failed to establish connection: {e}")
+                time.sleep(1)
         return self._channel
 
     def _publish_message(self, routing_key: str, message: str, headers: dict = {"sender": "booking"}):
