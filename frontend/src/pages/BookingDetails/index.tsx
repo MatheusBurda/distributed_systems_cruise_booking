@@ -116,21 +116,21 @@ const BookingDetails: FC = () => {
               <div className="info-item">
                 <span className="info-label">Payment Status:</span>
                 <span
-                  className={`status-badge ${booking.payment_status.toLowerCase()}`}
+                  className={`status-badge ${booking.payment?.status.toLowerCase()}`}
                 >
-                  {booking.payment_status}
+                  {booking.payment?.status}
                 </span>
               </div>
-              {booking.payment_id && (
+              {booking.payment?.id && (
                 <div className="info-item">
                   <span className="info-label">Payment ID:</span>
                   <span className="info-value payment-id">
-                    {booking.payment_id}
+                    {booking.payment?.id}
                   </span>
                 </div>
               )}
             </div>
-            {booking.payment_status === "PENDING" && (
+            {booking.payment?.status !== "PAID" && (
               <div className="payment-actions">
                 <button
                   className="pay-button"

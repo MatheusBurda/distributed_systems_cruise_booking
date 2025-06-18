@@ -28,6 +28,19 @@ export interface TicketBookingResponse {
   issued_at: string;
 }
 
+export interface Payment {
+  id: string;
+  booking_id: string;
+  amount: number;
+  currency: string;
+  status: "PENDING" | "PAID" | "REJECTED";
+  transaction_id: string;
+  created_at: string;
+  updated_at: string;
+  signature: string;
+  card_last4: string;
+}
+
 export interface Booking {
   boarding_date: string;
   created_at: string;
@@ -45,10 +58,9 @@ export interface Booking {
     | "BOOKED"
     | "CANCELLED"
     | "COMPLETED";
-  payment_status: "PENDING" | "PAID" | "REJECTED";
-  payment_id: string;
+  payment?: Payment;
   total_cost: number;
-  paymentLink: string;
+  paymentLink?: string;
   tickets?: TicketBookingResponse;
 }
 

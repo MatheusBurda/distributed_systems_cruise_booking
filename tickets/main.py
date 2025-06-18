@@ -52,7 +52,7 @@ def payment_accepted_callback(ch, method, properties, body):
         ch.basic_publish(
             exchange="direct", 
             routing_key=LOGS_ROUTING_KEY, 
-            body=f"ERROR: Payment accepted - signature invalid! transaction_id: {transaction["id"]} for reservation_id {transaction["reservation_id"]}".encode("utf-8"), 
+            body=f"ERROR: Payment accepted - signature invalid! transaction_id: {transaction["id"]} for booking_id {transaction["booking_id"]}".encode("utf-8"), 
             properties=pika.BasicProperties(headers={"sender": "ticket"})
         )
         return
@@ -60,7 +60,7 @@ def payment_accepted_callback(ch, method, properties, body):
     ch.basic_publish(
         exchange="direct", 
         routing_key=LOGS_ROUTING_KEY, 
-        body=f"Payment validated - generating tickets! transaction_id: {transaction["id"]} for reservation_id {transaction["reservation_id"]}".encode("utf-8"), 
+        body=f"Payment validated - generating tickets! transaction_id: {transaction["id"]} for booking_id {transaction["booking_id"]}".encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "ticket"})
     )
 
@@ -70,7 +70,7 @@ def payment_accepted_callback(ch, method, properties, body):
         ticket = Ticket(
             id=i,
             uuid=uuid.uuid4(),
-            booking_id=transaction["reservation_id"],
+            booking_id=transaction["booking_id"],
             cabin_number=transaction.get("cabin_number", "Unknown"),
             departure_date=datetime.fromisoformat(transaction.get("departure_date", datetime.now(UTC).isoformat()))
         )
@@ -78,7 +78,7 @@ def payment_accepted_callback(ch, method, properties, body):
 
     ticket_response = TicketBookingResponse(
         tickets=tickets,
-        reservation_id=transaction["reservation_id"]
+        booking_id=transaction["booking_id"]
     )
 
     ch.basic_publish(

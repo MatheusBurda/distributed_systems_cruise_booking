@@ -29,13 +29,18 @@ def update_payment():
     rabbitmq_manager = RabbitMQManager()
     transaction_data = {
         "id": payment.id,
-        "reservation_id": payment.booking_id,
-        "status": payment_status
+        "booking_id": payment.booking_id,
+        "status": payment_status,
+        "card_last4": payment.card_last4,
+        "amount": payment.amount,
+        "currency": payment.currency,
+        "status": payment.status.value,
+        "transaction_id": payment.transaction_id,
     }
     
     message_payload = {
         "transaction": transaction_data,
-        "signature": data.get("signature", "")
+        "signature": data.get("signature", ""),
     }
     
     if payment_status == "approved":
@@ -49,7 +54,7 @@ def update_payment():
         "payment": payment.to_dict()
     }), 200
 
-@payments_bp.route("/payment-link", methods=["POST"])
+@payments_bp.route("/payment-link", methods=["GET"])
 def get_payment_link():
     data = request.json
 

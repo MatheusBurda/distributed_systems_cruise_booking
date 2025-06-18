@@ -10,5 +10,5 @@ class BookingStatus(Enum):
 
 class PaymentStatus(Enum):
     PENDING = "PENDING"
-    PAID = "PAID"
-    REJECTED = "REJECTED" 
+    AUTHORIZED = "AUTHORIZED"
+    DECLINED = "DECLINED" 

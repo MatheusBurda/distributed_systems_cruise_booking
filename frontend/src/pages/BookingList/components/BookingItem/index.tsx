@@ -33,9 +33,9 @@ const BookingItem: FC<BookingItemProps> = ({ booking }) => {
             {booking.status}
           </span>
           <span
-            className={`status-badge ${booking.payment_status.toLowerCase()}`}
+            className={`status-badge ${booking.payment?.status.toLowerCase()}`}
           >
-            {booking.payment_status}
+            {booking.payment?.status}
           </span>
         </div>
       </div>

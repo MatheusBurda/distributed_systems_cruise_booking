@@ -52,7 +52,6 @@ const PaymentPage: FC = () => {
         throw new Error("Payment failed. Please try again.");
       }
 
-      // Redirect back to booking details after successful payment
       navigate(`/bookings/${bookingId}`);
     } catch (err) {
       setError((err as Error).message);

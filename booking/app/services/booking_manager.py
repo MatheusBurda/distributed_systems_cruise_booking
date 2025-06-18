@@ -1,14 +1,13 @@
-import json
 from typing import Dict, List, Optional
 from uuid import uuid4
 from flask import current_app
 import requests
-from time import sleep
 
+from app.models.base import BookingStatus, PaymentStatus
 from app.models.itinerary import Itinerary
 from app.models.booking import Booking
-from app.models.base import BookingStatus, PaymentStatus
 from app.models.ticket import TicketBookingResponse
+from app.models.payment import Payment
 
 class BookingsManager:
     _instance = None
@@ -65,7 +64,6 @@ class BookingsManager:
             customer_email=customer_email,
             customer_name=customer_name,
             status=BookingStatus.CREATED,
-            payment_status=PaymentStatus.PENDING
         )
         
         self.bookings[booking.id] = booking
@@ -79,28 +77,26 @@ class BookingsManager:
             raise Exception({"error": "Booking not found", "code": 404})
             
         booking.update_status(BookingStatus.CANCELLED)
-        # booking.update_payment_status(PaymentStatus.CANCELLED, None)
-
         updated_booking = self.get_booking(booking_id)
 
         return updated_booking
     
-    def register_payment_accepted(self, booking_id: str, payment_id: str) -> bool:
+    def register_payment_accepted(self, booking_id: str, payment: Payment) -> bool:
         booking = self.bookings.get(booking_id)
         if not booking:
             return False
             
-        booking.update_payment_status(PaymentStatus.PAID, payment_id)
+        booking.update_payment(payment)
         booking.update_status(BookingStatus.PAID)
 
         return True
 
-    def register_payment_rejected(self, booking_id: str, payment_id: str) -> bool:
+    def register_payment_rejected(self, booking_id: str, payment: Payment) -> bool:
         booking = self.bookings.get(booking_id)
         if not booking:
             return False
             
-        booking.update_payment_status(PaymentStatus.REJECTED, payment_id)
+        booking.update_payment(payment)
         booking.update_status(BookingStatus.REJECTED)
 
         return True

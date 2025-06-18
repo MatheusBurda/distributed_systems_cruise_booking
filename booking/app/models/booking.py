@@ -2,7 +2,8 @@ from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 from datetime import datetime, UTC
-from .base import BookingStatus, PaymentStatus
+from .base import BookingStatus
+from .payment import Payment
 from .ticket import TicketBookingResponse
 
 class Booking(BaseModel):
@@ -17,8 +18,8 @@ class Booking(BaseModel):
     customer_email: str
     customer_name: str
     status: BookingStatus = BookingStatus.CREATED
-    payment_status: PaymentStatus = PaymentStatus.PENDING
-    payment_id: Optional[str] = None
+    payment: Optional[Payment] = None
+    payment_link: Optional[str] = None
     tickets: Optional[TicketBookingResponse] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -49,10 +50,8 @@ class Booking(BaseModel):
         self.status = new_status
         self.updated_at = datetime.now(UTC)
 
-    def update_payment_status(self, new_status: PaymentStatus, payment_id: Optional[str] = None) -> None:
-        self.payment_status = new_status
-        if payment_id:
-            self.payment_id = payment_id
+    def update_payment(self, new_payment: Payment) -> None:
+        self.payment = new_payment
         self.updated_at = datetime.now(UTC)
 
     def add_tickets(self, new_tickets: TicketBookingResponse) -> None:
@@ -72,8 +71,7 @@ class Booking(BaseModel):
             "customer_email": self.customer_email,
             "customer_name": self.customer_name,
             "status": str(self.status.value),
-            "payment_status": str(self.payment_status.value),
-            "payment_id": self.payment_id,
+            "payment": self.payment.model_dump() if self.payment else None,
             "tickets": self.tickets.model_dump() if self.tickets else None,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
@@ -90,8 +88,8 @@ class Booking(BaseModel):
             data['uuid'] = UUID(data['uuid'])
         if isinstance(data.get('status'), str):
             data['status'] = BookingStatus(data['status'])
-        if isinstance(data.get('payment_status'), str):
-            data['payment_status'] = PaymentStatus(data['payment_status'])
+        if 'payment' in data:
+            data['payment'] = Payment(**data['payment'])
         if 'tickets' in data:
             data['tickets'] = TicketBookingResponse(**data['tickets']).tickets
         
