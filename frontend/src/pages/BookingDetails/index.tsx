@@ -170,7 +170,7 @@ const BookingDetails: FC = () => {
                     onClick={() =>
                       navigate("/payment", {
                         state: {
-                          paymentLink: booking.paymentLink,
+                          paymentLink: booking.payment_link,
                           bookingId: booking.id,
                           amount: booking.total_cost.toFixed(2),
                         },

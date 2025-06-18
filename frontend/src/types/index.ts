@@ -60,7 +60,7 @@ export interface Booking {
     | "COMPLETED";
   payment?: Payment;
   total_cost: number;
-  paymentLink?: string;
+  payment_link?: string;
   tickets?: TicketBookingResponse;
 }
 

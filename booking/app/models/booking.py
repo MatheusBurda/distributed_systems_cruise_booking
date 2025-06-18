@@ -71,8 +71,9 @@ class Booking(BaseModel):
             "customer_email": self.customer_email,
             "customer_name": self.customer_name,
             "status": str(self.status.value),
-            "payment": self.payment.model_dump() if self.payment else None,
-            "tickets": self.tickets.model_dump() if self.tickets else None,
+            "payment": self.payment.to_dict() if self.payment else None,
+            "payment_link": self.payment_link,
+            "tickets": self.tickets.to_dict() if self.tickets else None,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             **self.additional_data

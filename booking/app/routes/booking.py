@@ -13,6 +13,7 @@ def get_bookings():
         bookings = BookingsManager().get_all_bookings()
         list_bookings = [booking.to_dict() for booking in bookings]
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
     return jsonify(list_bookings)
 
@@ -21,6 +22,7 @@ def get_booking(booking_id):
     try:
         booking = BookingsManager().get_booking(booking_id)
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
     
     return jsonify(booking.to_dict())
@@ -43,7 +45,7 @@ def create_booking():
 
         payment_link = None
         try:
-            payment_response = requests.post(
+            payment_response = requests.get(
                 f'http://payments:{current_app.config["PAYMENT_MS_PORT"]}/payment-link',
                 json={
                     "booking_id": booking.id,
@@ -52,7 +54,7 @@ def create_booking():
                     "customer_name": booking.customer_name
                 }
             )
-            
+
             if payment_response.status_code == 201:
                 payment_data = payment_response.json()
                 payment_link = payment_data.get("payment", {}).get("payment_link")
@@ -62,10 +64,12 @@ def create_booking():
         except requests.RequestException as e:
             print(f"Error calling payments service: {str(e)}")
 
+        booking.payment_link = payment_link
         booking_response = booking.to_dict()
-        booking_response["payment_link"] = payment_link
+        print(booking_response)
             
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
     
     return jsonify(booking_response)
@@ -85,6 +89,7 @@ def cancel_booking(booking_id):
             "customer_name": result.customer_name
         }))
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
     
     return jsonify(result.to_dict())
