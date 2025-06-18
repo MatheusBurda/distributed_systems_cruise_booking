@@ -16,7 +16,18 @@ class Payment(BaseModel):
     card_last4: str
 
     def to_dict(self) -> Dict[str, Any]:
-        return self.model_dump()
+        return {
+            "id": self.id,
+            "booking_id": self.booking_id,
+            "amount": self.amount,
+            "currency": self.currency,
+            "status": str(self.status.value),
+            "transaction_id": self.transaction_id,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "signature": self.signature,
+            "card_last4": self.card_last4
+        }
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Payment':

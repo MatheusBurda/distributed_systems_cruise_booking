@@ -9,6 +9,7 @@ from app.services.marketing_manager import MarketingManager
 from app.core.crypto_verify import verify_signature
 from app.services.booking_manager import BookingsManager
 from app.models.payment import Payment
+from app.models.ticket import TicketBookingResponse
 
 class RabbitMQManager:
     _instance = None
@@ -116,17 +117,24 @@ class RabbitMQManager:
                         time.sleep(5)
                         continue
 
+                    # Set up consumers for each queue if not already set up
                     for queue_name in queues:
-                        method_frame, header_frame, body = self._channel.basic_get(queue=queue_name, auto_ack=True)
-                        if method_frame:
-                            handler = handlers.get(queue_name)
-                            if handler:
-                                try:
-                                    handler(self._channel, method_frame, header_frame, body)
-                                except Exception as handler_e:
-                                    print(f"Error handling message from {queue_name}: {handler_e}")
+                        try:
+                            self._channel.basic_consume(
+                                queue=queue_name,
+                                on_message_callback=lambda ch, method, properties, body, q=queue_name: 
+                                    handlers[q](ch, method, properties, body),
+                                auto_ack=True
+                            )
+                        except Exception as e:
+                            print(f"Error setting up consumer for {queue_name}: {e}")
+                            continue
                 
-                time.sleep(0.1)
+                # Process any pending messages without blocking
+                if self._connection and self._connection.is_open:
+                    self._connection.process_data_events()
+                
+                time.sleep(0.1)  # Small sleep to prevent CPU spinning
 
             except Exception as e:
                 print(f"Error in consumer thread loop: {e}")
@@ -142,9 +150,9 @@ class RabbitMQManager:
             self.publish_log(f"ERROR: Payment accepted - signature invalid! transaction_id: {transaction['id']} for booking_id {transaction['booking_id']}", headers={"sender": "booking"})
             return
         booking_manager = BookingsManager()
+        transaction["signature"] = data["signature"]
         payment = Payment.from_dict(transaction)
         booking_manager.register_payment_accepted(transaction["booking_id"], payment)
-
 
     def _handle_payment_rejected(self, ch, method, properties, body):
         data = json.loads(body.decode("utf-8"))
@@ -156,13 +164,15 @@ class RabbitMQManager:
             self.publish_log(f"ERROR: Payment rejected signature invalid! transaction_id: {transaction['id']} for booking_id {transaction['booking_id']}", headers={"sender": "booking"})
             return
         booking_manager = BookingsManager()
+        transaction["signature"] = data["signature"]
         payment = Payment.from_dict(transaction)
         booking_manager.register_payment_rejected(transaction["booking_id"], payment)
 
     def _handle_ticket_generated(self, ch, method, properties, body):
         data = json.loads(body.decode("utf-8"))
+        print("Ticket generated received", data["booking_id"])
         booking_manager = BookingsManager()
-        booking_manager.register_ticket_generated(data["booking_id"], data["tickets"])
+        booking_manager.register_ticket_generated(data["booking_id"], TicketBookingResponse.from_dict(data))
 
     def _handle_promotion(self, ch, method, properties, body):
         notified = MarketingManager().notify_all(body)

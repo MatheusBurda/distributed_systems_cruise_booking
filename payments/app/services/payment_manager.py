@@ -19,13 +19,15 @@ class PaymentManager:
         if not PaymentManager._initialized:
             PaymentManager._initialized = True
 
-    def create_payment(self, booking_id: str, amount: float, customer_email: str, customer_name: str) -> Payment:
+    def create_payment(self, booking_id: str, amount: float, customer_email: str, customer_name: str, number_of_passengers: int, number_of_cabins: int) -> Payment:
         payment = Payment(
             id=f"PAY-{uuid4().hex[:8].upper()}",
             booking_id=booking_id,
             amount=amount,
             customer_email=customer_email,
-            customer_name=customer_name
+            customer_name=customer_name,
+            number_of_passengers=number_of_passengers,
+            number_of_cabins=number_of_cabins
         )
         
         try:

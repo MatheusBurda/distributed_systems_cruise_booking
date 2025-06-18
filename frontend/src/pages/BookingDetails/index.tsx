@@ -199,8 +199,8 @@ const BookingDetails: FC = () => {
                         Cabin: {ticket.cabin_number}
                       </span>
                       <span className="ticket-date">
-                        Departure:{" "}
-                        {new Date(ticket.departure_date).toLocaleDateString()}
+                        Issued at:{" "}
+                        {new Date(ticket.issued_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>

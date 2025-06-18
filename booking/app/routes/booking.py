@@ -15,7 +15,7 @@ def get_bookings():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
-    return jsonify(list_bookings)
+    return jsonify(list_bookings if len(list_bookings) else [])
 
 @bookings_bp.route("/bookings/<booking_id>", methods=["GET"])
 def get_booking(booking_id):
@@ -25,7 +25,7 @@ def get_booking(booking_id):
         print(e)
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
     
-    return jsonify(booking.to_dict())
+    return jsonify(booking.to_dict() if booking else {})
 
 
 @bookings_bp.route("/bookings", methods=["POST"])
@@ -51,7 +51,9 @@ def create_booking():
                     "booking_id": booking.id,
                     "amount": booking.total_cost,
                     "customer_email": booking.customer_email,
-                    "customer_name": booking.customer_name
+                    "customer_name": booking.customer_name,
+                    "number_of_passengers": booking.number_of_passengers,
+                    "number_of_cabins": booking.number_of_cabins
                 }
             )
 
@@ -66,7 +68,6 @@ def create_booking():
 
         booking.payment_link = payment_link
         booking_response = booking.to_dict()
-        print(booking_response)
             
     except Exception as e:
         print(e)

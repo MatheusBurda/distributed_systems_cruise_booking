@@ -10,7 +10,7 @@ def create_payment_link():
     try:
         data = request.get_json()
         
-        required_fields = ['amount', 'currency', 'customer_email']
+        required_fields = ['amount', 'currency', 'customer_email', 'payment_id']
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
@@ -18,10 +18,11 @@ def create_payment_link():
         payment_link = payment_service.create_payment_link(
             amount=float(data['amount']),
             currency=data['currency'],
-            customer_email=data['customer_email']
+            customer_email=data['customer_email'],
+            external_id=data['payment_id']
         )
         
-        payment_url = f"{Config.FRONTEND_URL}/payment/{payment_link.id}"
+        payment_url = f"http://localhost:{Config.PAYMENT_API_PORT}/payment/{payment_link.id}"
         
         return jsonify({
             'payment_link_id': payment_link.id,
@@ -49,7 +50,7 @@ def process_payment_with_link(payment_link_id):
         payment = payment_service.process_payment_with_link(
             payment_link_id=payment_link_id,
             card_info=CreditCardInfo(
-                number=data['number'],
+                number=data['number'].replace(" ", ""),
                 expiry_month=int(data['expiry_month']),
                 expiry_year=int(data['expiry_year']),
                 cvv=data['cvv'],

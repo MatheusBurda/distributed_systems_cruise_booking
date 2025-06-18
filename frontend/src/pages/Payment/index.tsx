@@ -40,6 +40,21 @@ const PaymentPage: FC = () => {
     setError(null);
 
     try {
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear() % 100;
+
+      const expiryMonth = parseInt(formData.expiry_month);
+      const expiryYear = parseInt(formData.expiry_year);
+
+      if (
+        expiryYear < currentYear ||
+        expiryMonth < 1 ||
+        expiryMonth > 12 ||
+        (expiryYear === currentYear && expiryMonth < currentMonth)
+      ) {
+        throw new Error("Card expiry date must be in the future");
+      }
       const response = await fetch(paymentLink, {
         method: "POST",
         headers: {
@@ -80,7 +95,7 @@ const PaymentPage: FC = () => {
       <div className="payment-card">
         <div className="payment-summary">
           <h3>Payment Summary</h3>
-          <div className="amount">${amount.toFixed(2)}</div>
+          <div className="amount">${amount}</div>
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -105,7 +120,10 @@ const PaymentPage: FC = () => {
               type="text"
               id="number"
               name="number"
-              value={formData.number}
+              value={formData.number
+                .replace(/\s/g, "")
+                .replace(/(\d{4})/g, "$1 ")
+                .trim()}
               onChange={handleChange}
               placeholder="1234 5678 9012 3456"
               maxLength={19}

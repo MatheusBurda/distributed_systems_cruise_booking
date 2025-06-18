@@ -8,10 +8,10 @@ class Ticket(BaseModel):
     uuid: UUID
     booking_id: str
     cabin_number: str
-    departure_date: datetime
+    departure_date: datetime = Field(default_factory=lambda: datetime.now(UTC))
     issued_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 class TicketBookingResponse(BaseModel):
     tickets: List[Ticket]
-    reservation_id: str
+    booking_id: str
     issued_at: datetime = Field(default_factory=lambda: datetime.now(UTC)) 

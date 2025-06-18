@@ -64,17 +64,24 @@ def payment_accepted_callback(ch, method, properties, body):
         properties=pika.BasicProperties(headers={"sender": "ticket"})
     )
 
-    # Create tickets with minimal information
     tickets = []
-    for i in range(transaction["tickets_num"]):
-        ticket = Ticket(
-            id=i,
-            uuid=uuid.uuid4(),
-            booking_id=transaction["booking_id"],
-            cabin_number=transaction.get("cabin_number", "Unknown"),
-            departure_date=datetime.fromisoformat(transaction.get("departure_date", datetime.now(UTC).isoformat()))
-        )
-        tickets.append(ticket)
+    num_passengers = transaction["number_of_passengers"]
+    num_cabins = transaction.get("number_of_cabins", 1)
+    
+    passengers_per_cabin = [num_passengers // num_cabins + (1 if i < num_passengers % num_cabins else 0) 
+                          for i in range(num_cabins)]
+    
+    passenger_index = 0
+    for cabin_num, cabin_passengers in enumerate(passengers_per_cabin, 1):
+        for _ in range(cabin_passengers):
+            ticket = Ticket(
+                id=passenger_index,
+                uuid=uuid.uuid4(),
+                booking_id=transaction["booking_id"],
+                cabin_number=str(cabin_num),
+            )
+            tickets.append(ticket)
+            passenger_index += 1
 
     ticket_response = TicketBookingResponse(
         tickets=tickets,
@@ -87,6 +94,8 @@ def payment_accepted_callback(ch, method, properties, body):
         body=ticket_response.model_dump_json().encode("utf-8"), 
         properties=pika.BasicProperties(headers={"sender": "ticket"})
     )
+
+    print(f"Ticket generated published for booking_id {transaction['booking_id']} on {TICKET_GENERATED_ROUTING_KEY}")
 
 
 ##############################################################

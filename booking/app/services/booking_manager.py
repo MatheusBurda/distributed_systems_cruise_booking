@@ -106,6 +106,7 @@ class BookingsManager:
         if not booking:
             return False
             
+        print("Booking tickets: ", ticket_response)
         booking.tickets = ticket_response
         booking.update_status(BookingStatus.BOOKED)
 

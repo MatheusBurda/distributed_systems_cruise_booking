@@ -24,7 +24,7 @@ export interface Ticket {
 
 export interface TicketBookingResponse {
   tickets: Ticket[];
-  reservation_id: string;
+  booking_id: string;
   issued_at: string;
 }
 

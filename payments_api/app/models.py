@@ -2,12 +2,13 @@ from datetime import datetime, UTC
 from typing import Optional
 from enum import Enum
 from dataclasses import dataclass
+
 class PaymentStatus(Enum):
-    PENDING = "pending"
-    AUTHORIZED = "authorized"
-    DECLINED = "declined"
-    CANCELLED = "cancelled"
-    EXPIRED = "expired"
+    PENDING = "PENDING"
+    AUTHORIZED = "AUTHORIZED"
+    DECLINED = "DECLINED"
+    CANCELLED = "CANCELLED"
+    EXPIRED = "EXPIRED"
 
 @dataclass
 class CreditCardInfo:
@@ -32,6 +33,7 @@ class PaymentLink:
     customer_email: str
     created_at: datetime
     expires_at: datetime
+    external_id: str
     is_used: bool = False
 
 @dataclass
