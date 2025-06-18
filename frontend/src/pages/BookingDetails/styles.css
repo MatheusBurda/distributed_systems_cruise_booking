@@ -17,6 +17,7 @@
     margin: 0;
     color: #2c3e50;
     font-size: 2rem;
+    flex: 1;
 }
 
 .back-button {
@@ -190,7 +191,8 @@
     padding-top: 1.5rem;
     border-top: 1px solid #e5e5e5;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .pay-button {
@@ -210,4 +212,23 @@
     background-color: #219a52;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+.cancel-button {
+    padding: 0.75rem 1.5rem;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+}
+
+.cancel-button:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }

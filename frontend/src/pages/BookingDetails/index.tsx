@@ -102,23 +102,25 @@ const BookingDetails: FC = () => {
             <h4>Payment Details</h4>
             <div className="info-list">
               <div className="info-item">
-                <span className="info-label">Total Cost:</span>
-                <span className="info-value cost">
-                  ${booking.total_cost.toFixed(2)}
-                </span>
-              </div>
-              <div className="info-item">
                 <span className="info-label">Cost per Cabin:</span>
                 <span className="info-value">
                   ${(booking.total_cost / booking.number_of_cabins).toFixed(2)}
                 </span>
               </div>
               <div className="info-item">
+                <span className="info-label">Total Cost:</span>
+                <span className="info-value cost">
+                  ${booking.total_cost.toFixed(2)}
+                </span>
+              </div>
+              <div className="info-item">
                 <span className="info-label">Payment Status:</span>
                 <span
-                  className={`status-badge ${booking.payment?.status.toLowerCase()}`}
+                  className={`status-badge ${
+                    booking.payment?.status?.toLowerCase() || "pending"
+                  }`}
                 >
-                  {booking.payment?.status}
+                  {booking.payment?.status || "PENDING"}
                 </span>
               </div>
               {booking.payment?.id && (
@@ -130,22 +132,54 @@ const BookingDetails: FC = () => {
                 </div>
               )}
             </div>
-            {booking.payment?.status !== "PAID" && (
+            {booking.status !== "CANCELLED" && (
               <div className="payment-actions">
                 <button
-                  className="pay-button"
-                  onClick={() =>
-                    navigate("/payment", {
-                      state: {
-                        paymentLink: booking.paymentLink,
-                        bookingId: booking.id,
-                        amount: booking.total_cost.toFixed(2),
-                      },
-                    })
-                  }
+                  className="cancel-button"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to cancel this booking?"
+                      )
+                    ) {
+                      fetch(
+                        `${import.meta.env.VITE_API_URL}/bookings/${
+                          booking.id
+                        }`,
+                        {
+                          method: "DELETE",
+                        }
+                      )
+                        .then((response) => {
+                          if (!response.ok) {
+                            throw new Error("Failed to cancel booking");
+                          }
+                          window.location.reload();
+                        })
+                        .catch((error) => {
+                          alert("Error cancelling booking: " + error.message);
+                        });
+                    }
+                  }}
                 >
-                  Pay Now
+                  Cancel Booking
                 </button>
+                {booking.payment?.status !== "PAID" && (
+                  <button
+                    className="pay-button"
+                    onClick={() =>
+                      navigate("/payment", {
+                        state: {
+                          paymentLink: booking.paymentLink,
+                          bookingId: booking.id,
+                          amount: booking.total_cost.toFixed(2),
+                        },
+                      })
+                    }
+                  >
+                    Pay Now
+                  </button>
+                )}
               </div>
             )}
           </div>
