@@ -1,6 +1,6 @@
 import { useState, useEffect, FC, ChangeEvent, FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Itinerary, BookingFormData, Booking } from "../../types";
+import { Itinerary, BookingFormData } from "../../types";
 import "./styles.css";
 
 const BookingFormPage: FC = () => {
