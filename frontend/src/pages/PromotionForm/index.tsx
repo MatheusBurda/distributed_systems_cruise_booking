@@ -1,32 +1,32 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { Destination, PromotionFormData } from "../types";
+import { Itinerary, PromotionFormData } from "../../types";
+import "./styles.css";
 
-function PromotionForm() {
+function PromotionFormPage() {
   const [formData, setFormData] = useState<PromotionFormData>({
     destination_id: 0,
     boarding_date: "",
     new_cost: 0,
   });
 
-  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [destinations, setDestinations] = useState<Itinerary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [formLoading, setFormLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [availableDates, setAvailableDates] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchDestinations = async () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/destinations`
+          `${import.meta.env.VITE_API_URL}/itineraries`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch destinations");
         }
         const data = await response.json();
-        setDestinations(data.destinations);
+        setDestinations(data);
       } catch (err: any) {
         setError(`Error fetching destinations: ${err.message}`);
       } finally {
@@ -43,7 +43,6 @@ function PromotionForm() {
         (d) => d.id === Number(formData.destination_id)
       );
       if (selected) {
-        setAvailableDates(selected.departure_dates);
         setFormData((prev) => ({
           ...prev,
           boarding_date: "",
@@ -156,15 +155,9 @@ function PromotionForm() {
               required
             >
               <option value="">-- Select a Date --</option>
-              {availableDates.map((date) => (
-                <option key={date} value={date}>
-                  {new Date(date).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </option>
-              ))}
+              <option value={currentDestination.date}>
+                {currentDestination.date}
+              </option>
             </select>
           </div>
         )}
@@ -236,4 +229,4 @@ function PromotionForm() {
   );
 }
 
-export default PromotionForm;
+export default PromotionFormPage;

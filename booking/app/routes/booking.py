@@ -16,6 +16,15 @@ def get_bookings():
         return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
     return jsonify(list_bookings)
 
+@bookings_bp.route("/bookings/<booking_id>", methods=["GET"])
+def get_booking(booking_id):
+    try:
+        booking = BookingsManager().get_booking(booking_id)
+    except Exception as e:
+        return jsonify({"error": str(e)}), e.__dict__.get("code", 500)
+    
+    return jsonify(booking.to_dict())
+
 
 @bookings_bp.route("/bookings", methods=["POST"])
 def create_booking():

@@ -74,6 +74,9 @@
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .destination-card:hover {
@@ -154,6 +157,7 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  align-self: flex-end;
 }
 
 .book-button:hover {
@@ -247,12 +251,6 @@
   margin-bottom: 1rem;
 }
 
-.reservation-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
 .reservation-item {
   border: 1px solid #e5e5e5;
   border-radius: 8px;
@@ -283,22 +281,34 @@
   color: #2c3e50;
 }
 
-.status-badge {
-  font-size: 0.75rem;
-  font-weight: bold;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  text-transform: uppercase;
+.status-badges {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.status-badge.paid {
-  background-color: #e6f7ee;
-  color: #27ae60;
+.status-badge.pending {
+  background-color: #f1c40f;
+  color: #fff;
 }
 
-.status-badge.rejected {
-  background-color: #fceeeb;
-  color: #e74c3c;
+.status-badge.created {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.status-badge.booked {
+  background-color: #2ecc71;
+  color: #fff;
+}
+
+.status-badge.cancelled {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.status-badge.completed {
+  background-color: #27ae60;
+  color: #fff;
 }
 
 .reservation-details {
@@ -347,6 +357,34 @@
 .ticket-uuid {
   color: #95a5a6;
   font-family: monospace;
+}
+
+.ticket-info {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.ticket-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ticket-cabin,
+.ticket-date,
+.ticket-issued {
+  font-size: 0.75rem;
+  color: #7f8c8d;
+}
+
+.ticket-date {
+  color: #2c3e50;
+}
+
+.ticket-issued {
+  color: #95a5a6;
 }
 
 /* Booking Form Styles */
@@ -460,8 +498,7 @@
     flex-wrap: wrap;
   }
 
-  .destination-grid,
-  .reservation-list {
+  .destination-grid {
     grid-template-columns: 1fr;
   }
 

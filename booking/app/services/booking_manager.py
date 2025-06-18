@@ -119,6 +119,5 @@ class BookingsManager:
         return self.bookings.get(booking_id)
 
     def get_all_bookings(self) -> List[Booking]:
-        print(f"Bookings: {self.bookings.values()}")
         return list(self.bookings.values())
 

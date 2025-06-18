@@ -1,20 +1,28 @@
 import { useState, FC, ChangeEvent, FormEvent } from "react";
-import { FilterParams } from "../types";
+import { FilterParams } from "../../../types";
 
-interface DestinationFilterProps {
+interface ItineraryFilterProps {
   onFilterChange: (filters: FilterParams) => void;
 }
 
-const DestinationFilter: FC<DestinationFilterProps> = ({ onFilterChange }) => {
+const ItineraryFilter: FC<ItineraryFilterProps> = ({ onFilterChange }) => {
   const [filters, setFilters] = useState<FilterParams>({
     origin: "",
     destination: "",
     date: "",
+    min_cabins: 0,
+    places_visited: "",
+    continent: "",
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    const updatedFilters = { ...filters, [name]: value };
+    const updatedFilters = {
+      ...filters,
+      [name]: name === "min_cabins" ? Number(value) : value,
+    };
     setFilters(updatedFilters);
   };
 
@@ -28,6 +36,9 @@ const DestinationFilter: FC<DestinationFilterProps> = ({ onFilterChange }) => {
       origin: "",
       destination: "",
       date: "",
+      min_cabins: 0,
+      places_visited: "",
+      continent: "",
     };
     setFilters(resetFilters);
     onFilterChange(resetFilters);
@@ -72,6 +83,42 @@ const DestinationFilter: FC<DestinationFilterProps> = ({ onFilterChange }) => {
           />
         </div>
 
+        <div className="form-group">
+          <label htmlFor="min_cabins">Minimum Available Cabins</label>
+          <input
+            type="number"
+            id="min_cabins"
+            name="min_cabins"
+            min="0"
+            value={filters.min_cabins}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="places_visited">Places Visited</label>
+          <input
+            type="text"
+            id="places_visited"
+            name="places_visited"
+            value={filters.places_visited}
+            onChange={handleChange}
+            placeholder="E.g., Rio de Janeiro, Salvador"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="continent">Continent</label>
+          <input
+            type="text"
+            id="continent"
+            name="continent"
+            value={filters.continent}
+            onChange={handleChange}
+            placeholder="E.g., South America"
+          />
+        </div>
+
         <div className="filter-actions">
           <button type="submit" className="btn-filter">
             Apply Filters
@@ -85,4 +132,4 @@ const DestinationFilter: FC<DestinationFilterProps> = ({ onFilterChange }) => {
   );
 };
 
-export default DestinationFilter;
+export default ItineraryFilter;

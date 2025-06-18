@@ -1,7 +1,8 @@
-export interface Destination {
+export interface Itinerary {
+  available_cabins: number;
   cabin_capacity: number;
   cabin_cost: number;
-  departure_dates: string[];
+  date: string;
   destination: string;
   id: number;
   number_of_nights: number;
@@ -15,9 +16,19 @@ export interface Destination {
 export interface Ticket {
   id: number;
   uuid: string;
+  booking_id: string;
+  cabin_number: string;
+  departure_date: string;
+  issued_at: string;
 }
 
-export interface Reservation {
+export interface TicketBookingResponse {
+  tickets: Ticket[];
+  reservation_id: string;
+  issued_at: string;
+}
+
+export interface Booking {
   boarding_date: string;
   created_at: string;
   destination_id: number;
@@ -27,9 +38,18 @@ export interface Reservation {
   origin: string;
   customer_email: string;
   customer_name: string;
-  status: "PAID" | "REJECTED";
+  status:
+    | "PAID"
+    | "REJECTED"
+    | "CREATED"
+    | "BOOKED"
+    | "CANCELLED"
+    | "COMPLETED";
+  payment_status: "PENDING" | "PAID" | "REJECTED";
+  payment_id: string;
   total_cost: number;
-  tickets?: Ticket[];
+  paymentLink: string;
+  tickets?: TicketBookingResponse;
 }
 
 export interface BookingFormData {
@@ -52,4 +72,7 @@ export interface FilterParams {
   origin: string;
   destination: string;
   date: string;
+  min_cabins: number;
+  places_visited: string;
+  continent: string;
 }

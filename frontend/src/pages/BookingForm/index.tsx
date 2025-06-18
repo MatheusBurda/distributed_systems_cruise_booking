@@ -1,20 +1,24 @@
 import { useState, useEffect, FC, ChangeEvent, FormEvent } from "react";
-import { Destination, BookingFormData } from "../types";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Itinerary, BookingFormData, Booking } from "../../types";
+import "./styles.css";
 
-interface BookingFormProps {
-  selectedDestination: Destination | null;
-}
+const BookingFormPage: FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const selectedDestination = location.state?.destination as Itinerary | null;
 
-const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
   const [formData, setFormData] = useState<BookingFormData>({
     number_of_passengers: selectedDestination?.cabin_capacity || 2,
     boarding_date: "",
     destination_id: selectedDestination?.id || 0,
     number_of_cabins: 1,
     origin: selectedDestination?.origin || "",
+    customer_email: "",
+    customer_name: "",
   });
 
-  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [destinations, setDestinations] = useState<Itinerary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,13 +28,13 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
       const fetchDestinations = async () => {
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/destinations`
+            `${import.meta.env.VITE_API_URL}/itineraries`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch destinations");
           }
           const data = await response.json();
-          setDestinations(data.destinations);
+          setDestinations(data);
         } catch (err) {
           setError(`Error fetching destinations: ${(err as Error).message}`);
         }
@@ -51,10 +55,12 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
     if (selectedDestination) {
       setFormData({
         number_of_passengers: selectedDestination.cabin_capacity,
-        boarding_date: selectedDestination.departure_dates[0] || "",
+        boarding_date: selectedDestination.date || "",
         destination_id: selectedDestination.id,
         number_of_cabins: 1,
         origin: selectedDestination.origin,
+        customer_email: "",
+        customer_name: "",
       });
     }
   }, [selectedDestination]);
@@ -81,7 +87,7 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
         ...formData,
         destination_id: destinationId,
         origin: selected.origin,
-        boarding_date: selected.departure_dates[0] || "",
+        boarding_date: selected.date || "",
         number_of_passengers: selected.cabin_capacity,
       });
     }
@@ -94,29 +100,31 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
     setSuccess(false);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/reservation`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create reservation");
+        throw new Error(errorData.message || "Failed to create booking");
       }
 
+      const bookingData = await response.json();
       setSuccess(true);
+      navigate(`/bookings/${bookingData.id}`);
+
       setFormData({
         number_of_passengers: 2,
         boarding_date: "",
         destination_id: 0,
         number_of_cabins: 1,
         origin: "",
+        customer_email: "",
+        customer_name: "",
       });
     } catch (err) {
       setError((err as Error).message);
@@ -128,7 +136,6 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
   const currentDestination =
     selectedDestination ||
     destinations.find((d) => d.id === formData.destination_id);
-  const availableDates = currentDestination?.departure_dates || [];
 
   return (
     <div className="booking-form-container">
@@ -136,7 +143,7 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
 
       {error && <div className="error-message">{error}</div>}
       {success && (
-        <div className="success-message">Reservation created successfully!</div>
+        <div className="success-message">Booking created successfully!</div>
       )}
 
       <form onSubmit={handleSubmit} className="booking-form">
@@ -163,24 +170,14 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
 
         <div className="form-group">
           <label htmlFor="boarding_date">Boarding Date</label>
-          <select
+          <input
+            type="date"
             id="boarding_date"
             name="boarding_date"
             value={formData.boarding_date}
             onChange={handleChange}
-            required
-          >
-            <option value="">-- Select a Date --</option>
-            {availableDates.map((date) => (
-              <option key={date} value={date}>
-                {new Date(date).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </option>
-            ))}
-          </select>
+            disabled
+          />
         </div>
 
         <div className="form-group">
@@ -235,40 +232,38 @@ const BookingForm: FC<BookingFormProps> = ({ selectedDestination }) => {
           />
         </div>
 
-        {currentDestination && (
-          <div className="cost-summary">
-            <h4>Booking Summary</h4>
-            <p>
-              <strong>Destination:</strong> {currentDestination.destination}
-            </p>
-            <p>
-              <strong>Ship:</strong> {currentDestination.ship_name}
-            </p>
-            <p>
-              <strong>Number of Nights:</strong>{" "}
-              {currentDestination.number_of_nights}
-            </p>
-            <p>
-              <strong>Cabin Cost:</strong> ${currentDestination.cabin_cost} per
-              cabin
-            </p>
-            <p>
-              <strong>Total Cost:</strong> $
-              {currentDestination.cabin_cost * formData.number_of_cabins}
-            </p>
-          </div>
-        )}
+        <div className="form-group">
+          <label htmlFor="customer_name">Full Name</label>
+          <input
+            type="text"
+            id="customer_name"
+            name="customer_name"
+            value={formData.customer_name}
+            onChange={handleChange}
+            required
+            placeholder="Enter your full name"
+          />
+        </div>
 
-        <button
-          type="submit"
-          className="btn-book"
-          disabled={loading || !formData.boarding_date}
-        >
-          {loading ? "Processing..." : "Book Now"}
+        <div className="form-group">
+          <label htmlFor="customer_email">Email</label>
+          <input
+            type="email"
+            id="customer_email"
+            name="customer_email"
+            value={formData.customer_email}
+            onChange={handleChange}
+            required
+            placeholder="Enter your email"
+          />
+        </div>
+
+        <button type="submit" className="btn-book" disabled={loading}>
+          {loading ? "Creating Booking..." : "Book Now"}
         </button>
       </form>
     </div>
   );
 };
 
-export default BookingForm;
+export default BookingFormPage;

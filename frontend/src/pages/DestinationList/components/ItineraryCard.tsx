@@ -1,15 +1,12 @@
 import { FC } from "react";
-import { Destination } from "../types";
+import { Itinerary } from "../../../types";
 
-interface DestinationCardProps {
-  destination: Destination;
+interface ItineraryCardProps {
+  destination: Itinerary;
   onSelect: () => void;
 }
 
-const DestinationCard: FC<DestinationCardProps> = ({
-  destination,
-  onSelect,
-}) => {
+const ItineraryCard: FC<ItineraryCardProps> = ({ destination, onSelect }) => {
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -43,6 +40,21 @@ const DestinationCard: FC<DestinationCardProps> = ({
           <span className="label">Cabin Capacity:</span>
           <span>{destination.cabin_capacity} people</span>
         </div>
+
+        <div className="detail-item">
+          <span className="label">Available Cabins:</span>
+          <span>{destination.available_cabins}</span>
+        </div>
+
+        <div className="detail-item">
+          <span className="label">Continent:</span>
+          <span>{destination.trip_continent}</span>
+        </div>
+
+        <div className="detail-item">
+          <span className="label">Return Port:</span>
+          <span>{destination.return_port}</span>
+        </div>
       </div>
 
       <div className="places-visited">
@@ -51,19 +63,21 @@ const DestinationCard: FC<DestinationCardProps> = ({
       </div>
 
       <div className="departure-dates">
-        <h4>Departure Dates:</h4>
-        <ul>
-          {destination.departure_dates.map((date) => (
-            <li key={date}>{formatDate(date)}</li>
-          ))}
-        </ul>
+        <h4>Departure Date:</h4>
+        <p>{formatDate(destination.date)}</p>
       </div>
 
-      <button className="book-button" onClick={onSelect}>
-        Book This Cruise
+      <button
+        className="book-button"
+        onClick={onSelect}
+        disabled={destination.available_cabins === 0}
+      >
+        {destination.available_cabins === 0
+          ? "No Cabins Available"
+          : "Book This Cruise"}
       </button>
     </div>
   );
 };
 
-export default DestinationCard;
+export default ItineraryCard;

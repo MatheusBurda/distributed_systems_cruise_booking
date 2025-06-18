@@ -1,48 +1,66 @@
-import { useState } from "react";
-import DestinationList from "./components/DestinationList";
-import ReservationList from "./components/ReservationList";
-import BookingForm from "./components/BookingForm";
-import PromotionForm from "./components/PromotionForm";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import DestinationListPage from "./pages/DestinationList";
+import BookingListPage from "./pages/BookingList";
+import BookingFormPage from "./pages/BookingForm";
+import PromotionFormPage from "./pages/PromotionForm";
+import BookingDetails from "./pages/BookingDetails";
 import Navbar from "./components/Navbar";
-import { Destination } from "./types";
+import PaymentPage from "./pages/Payment";
 import "./App.css";
 
 function App() {
-  const [activeSection, setActiveSection] = useState<string>("destinations");
-  const [selectedDestination, setSelectedDestination] =
-    useState<Destination | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  const handleDestinationSelect = (destination: Destination) => {
-    setSelectedDestination(destination);
-    setActiveSection("booking");
+  const getActiveSection = () => {
+    if (currentPath === "/") return "destinations";
+    if (currentPath === "/bookings") return "reservations";
+    if (currentPath === "/bookings/new") return "booking";
+    if (currentPath === "/promotions") return "promotions";
+    if (currentPath.startsWith("/bookings/")) return "booking-details";
+    if (currentPath === "/payment") return "payment";
+    return "destinations";
   };
 
-  const renderContent = () => {
-    switch (activeSection) {
+  const handleSectionChange = (section: string) => {
+    switch (section) {
       case "destinations":
-        return (
-          <DestinationList onSelectDestination={handleDestinationSelect} />
-        );
+        navigate("/");
+        break;
       case "reservations":
-        return <ReservationList />;
+        navigate("/bookings");
+        break;
       case "booking":
-        return <BookingForm selectedDestination={selectedDestination} />;
+        navigate("/bookings/new");
+        break;
       case "promotions":
-        return <PromotionForm />;
+        navigate("/promotions");
+        break;
+      case "payment":
+        navigate("/payment");
+        break;
       default:
-        return (
-          <DestinationList onSelectDestination={handleDestinationSelect} />
-        );
+        navigate("/");
     }
   };
 
   return (
     <div className="app-container">
       <Navbar
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
+        activeSection={getActiveSection()}
+        setActiveSection={handleSectionChange}
       />
-      <main className="content">{renderContent()}</main>
+      <main className="content">
+        <Routes>
+          <Route path="/" element={<DestinationListPage />} />
+          <Route path="/bookings" element={<BookingListPage />} />
+          <Route path="/bookings/new" element={<BookingFormPage />} />
+          <Route path="/bookings/:id" element={<BookingDetails />} />
+          <Route path="/promotions" element={<PromotionFormPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
+        </Routes>
+      </main>
     </div>
   );
 }
